@@ -10,6 +10,7 @@ copyright:           (c) 2012 Galois, Inc
 category:            Language
 build-type:          Simple
 cabal-version:       >=1.8
+homepage:            https://github.com/GaloisInc/aterm-utils
 
 executable ppaterm
   hs-source-dirs:    src
@@ -42,3 +43,7 @@ library
   if impl(ghc >= 7.0.1)
     ghc-prof-options: -rtsopts
   ghc-prof-options: -prof -auto-all -caf-all
+
+source-repository head
+  type:     git
+  location: git://github.com/GaloisInc/aterm-utils.git
