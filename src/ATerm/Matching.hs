@@ -59,7 +59,7 @@ exactlyI i t = case getATerm t of
 exactlyL :: MonadPlus m => [ATermTable -> m a] -> ATermTable -> m [a]
 exactlyL ms t = case getATerm t of
   ShAList ls _ -> do
-    _ <- guard (length ms == length ls)
+    guard (length ms == length ls)
     sequence (zipWith (\m i -> m (getATermByIndex1 i t)) ms ls)
   _ -> mzero
 
@@ -67,18 +67,16 @@ exactlyL ms t = case getATerm t of
 exactlyA :: MonadPlus m => String -> [ATermTable -> m a] -> ATermTable -> m [a]
 exactlyA s ms t = case getATerm t of
   ShAAppl s' ls _ -> do
-    _ <- exactly s s'
-    _ <- guard (length ms == length ls)
+    exactly s s'
+    guard (length ms == length ls)
     sequence (zipWith (\m i -> U.app m t i) ms ls)
   _ -> mzero
 
 -- | Looks for an Appl with name 's' and any children
 exactlyNamed :: MonadPlus m => String -> ATermTable -> m ()
 exactlyNamed s t = case getATerm t of
-  ShAAppl s' _ _ -> do
-    _ <- exactly s s'
-    return ()
-  _ -> mzero
+  ShAAppl s' _ _ -> exactly s s'
+  _              -> mzero
 
 ---------------------------------------------------------------------
 -- ** Partial matchers, ie., they just specify part of the structure
@@ -114,7 +112,7 @@ containsL ms t = case getATerm t of
 containsA :: String -> [ATermTable -> a] -> ATermTable -> [a]
 containsA s ams t = case getATerm t of
   ShAAppl s' ls _ -> do
-    _ <- exactly s s'
+    exactly s s'
     containsChildren ams ls t
   _               -> mzero
 
