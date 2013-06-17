@@ -29,12 +29,14 @@ executable ppaterm
 
 library
 
-  exposed-modules:   ATerm.Utilities
+  exposed-modules:   ATerm.Generics
                    , ATerm.Matching
                    , ATerm.Pretty
+                   , ATerm.Utilities
 
   Build-depends:       base < 5
                      , aterm
+                     , mtl
                      , transformers
                      , wl-pprint
 
