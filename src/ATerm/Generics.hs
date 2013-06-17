@@ -58,9 +58,9 @@ instance                           ToATerm Float
 instance                           ToATerm Double
 instance                           ToATerm ()
 instance ToATerm a              => ToATerm (Maybe a)
-instance (ToATerm a, ToATerm b) => ToATerm (a,b)
 instance (ToATerm a, ToATerm b) => ToATerm (Either a b)
 
+instance (ToATerm a, ToATerm b) => ToATerm (a,b)   where toATerm     = tupleToATerm
 instance                           ToATerm Char    where toATerm     = showToATerm
                                                          toATermList = stringToATerm
 instance                           ToATerm Int     where toATerm     = integralToATerm
@@ -80,6 +80,9 @@ listToATerm xs = AList (map toATerm xs) []
 
 stringToATerm :: String -> ATerm
 stringToATerm s = AAppl (show s) [] []
+
+tupleToATerm :: (ToATerm a, ToATerm b) => (a,b) -> ATerm
+tupleToATerm (a,b) = AAppl [] [toATerm a, toATerm b] []
 
 ------------------------------------------------------------------------
 -- Deserialization
@@ -101,10 +104,11 @@ instance FromATerm                                  ()
 instance FromATerm                                  Bool
 instance FromATerm                                  Float
 instance FromATerm                                  Double
-instance (FromATerm a, FromATerm b)              => FromATerm (a,b)
 instance (FromATerm a, FromATerm b, FromATerm c) => FromATerm (a, b, c)
 instance (FromATerm a, FromATerm b)              => FromATerm (Either a b)
 instance FromATerm a                             => FromATerm (Maybe a)
+
+instance (FromATerm a, FromATerm b)              => FromATerm (a,b) where fromATerm = atermToTuple
 
 instance                FromATerm Int     where fromATerm     = atermToIntegral
 instance                FromATerm Integer where fromATerm     = atermToIntegral
@@ -130,7 +134,12 @@ atermToList :: FromATerm a => ATerm -> Maybe [a]
 atermToList (AList as _) = mapM fromATerm as
 atermToList _            = Nothing
 
-
+atermToTuple :: (FromATerm a, FromATerm b) => ATerm -> Maybe (a,b)
+atermToTuple (AAppl "" [a,b] []) = do
+  a' <- fromATerm a
+  b' <- fromATerm b
+  return (a',b')
+atermToTuple _                   = Nothing
 ------------------------------------------------------------------------
 -- Generic data type deserialization
 ------------------------------------------------------------------------
