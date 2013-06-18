@@ -68,6 +68,8 @@ instance                           ToATerm Integer where toATerm     = integralT
                                                          toATermList = listToATerm
 instance ToATerm a              => ToATerm [a]     where toATerm     = toATermList
 
+instance (ToATerm a, ToATerm b, ToATerm c) => ToATerm (a,b,c)   where toATerm     = tripleToATerm
+
 -- Base type implementations
 integralToATerm :: Integral a => a -> ATerm
 integralToATerm x = AInt (toInteger x) []
@@ -83,6 +85,9 @@ stringToATerm s = AAppl (show s) [] []
 
 tupleToATerm :: (ToATerm a, ToATerm b) => (a,b) -> ATerm
 tupleToATerm (a,b) = AAppl [] [toATerm a, toATerm b] []
+
+tripleToATerm :: (ToATerm a, ToATerm b, ToATerm c) => (a,b,c) -> ATerm
+tripleToATerm (a,b,c) = AAppl [] [toATerm a, toATerm b, toATerm c] []
 
 ------------------------------------------------------------------------
 -- Deserialization
@@ -104,11 +109,11 @@ instance FromATerm                                  ()
 instance FromATerm                                  Bool
 instance FromATerm                                  Float
 instance FromATerm                                  Double
-instance (FromATerm a, FromATerm b, FromATerm c) => FromATerm (a, b, c)
 instance (FromATerm a, FromATerm b)              => FromATerm (Either a b)
 instance FromATerm a                             => FromATerm (Maybe a)
 
-instance (FromATerm a, FromATerm b)              => FromATerm (a,b) where fromATerm = atermToTuple
+instance (FromATerm a, FromATerm b)              => FromATerm (a,b)     where fromATerm = atermToTuple
+instance (FromATerm a, FromATerm b, FromATerm c) => FromATerm (a, b, c) where fromATerm = atermToTriple
 
 instance                FromATerm Int     where fromATerm     = atermToIntegral
 instance                FromATerm Integer where fromATerm     = atermToIntegral
@@ -140,6 +145,14 @@ atermToTuple (AAppl "" [a,b] []) = do
   b' <- fromATerm b
   return (a',b')
 atermToTuple _                   = Nothing
+
+atermToTriple :: (FromATerm a, FromATerm b, FromATerm c) => ATerm -> Maybe (a,b,c)
+atermToTriple (AAppl "" [a,b,c] []) = do
+  a' <- fromATerm a
+  b' <- fromATerm b
+  c' <- fromATerm c
+  return (a',b',c')
+atermToTriple _                     = Nothing
 ------------------------------------------------------------------------
 -- Generic data type deserialization
 ------------------------------------------------------------------------
