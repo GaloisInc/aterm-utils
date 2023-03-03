@@ -54,8 +54,6 @@ class ToATerm a where
 
 -- Automatically derived instances
 instance                           ToATerm Bool
-instance                           ToATerm Float
-instance                           ToATerm Double
 instance                           ToATerm ()
 instance ToATerm a              => ToATerm (Maybe a)
 instance (ToATerm a, ToATerm b) => ToATerm (Either a b)
@@ -64,7 +62,12 @@ instance (ToATerm a, ToATerm b) => ToATerm (a,b)   where toATerm     = tupleToAT
 instance                           ToATerm Char    where toATerm     = showToATerm
                                                          toATermList = stringToATerm
 instance                           ToATerm Int     where toATerm     = integralToATerm
+                                                         toATermList = listToATerm
 instance                           ToATerm Integer where toATerm     = integralToATerm
+                                                         toATermList = listToATerm
+instance                           ToATerm Float   where toATerm     = showToATerm
+                                                         toATermList = listToATerm
+instance                           ToATerm Double  where toATerm     = showToATerm
                                                          toATermList = listToATerm
 instance ToATerm a              => ToATerm [a]     where toATerm     = toATermList
 
@@ -107,14 +110,14 @@ class FromATerm a where
 -- Automatically derived instances
 instance FromATerm                                  ()
 instance FromATerm                                  Bool
-instance FromATerm                                  Float
-instance FromATerm                                  Double
 instance (FromATerm a, FromATerm b)              => FromATerm (Either a b)
 instance FromATerm a                             => FromATerm (Maybe a)
 
 instance (FromATerm a, FromATerm b)              => FromATerm (a,b)     where fromATerm = atermToTuple
 instance (FromATerm a, FromATerm b, FromATerm c) => FromATerm (a, b, c) where fromATerm = atermToTriple
 
+instance                FromATerm Float   where fromATerm     = atermToRead
+instance                FromATerm Double  where fromATerm     = atermToRead
 instance                FromATerm Int     where fromATerm     = atermToIntegral
 instance                FromATerm Integer where fromATerm     = atermToIntegral
 instance                FromATerm Char    where fromATerm     = atermToRead
@@ -171,7 +174,7 @@ instance (Constructor c, GFromATerms a) => GFromATerm (C1 c a) where
   gFromATerm (AAppl str xs _) =
     -- Lambda used to get a monomorphic binding
     -- conName does not evaluate its argument
-    (\result@(~(Just x)) -> if conName x == str then result else Nothing)
+    (\result -> if (conName <$> result) == Just str then result else Nothing)
     (M1 <$> gFromATerms' xs)
 
   gFromATerm _ = Nothing

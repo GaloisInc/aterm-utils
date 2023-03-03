@@ -4,6 +4,7 @@ module ATerm.Pretty
 )
 where
 
+import Prelude hiding ((<$>))
 import Text.PrettyPrint.Leijen
 import ATerm.AbstractSyntax
 

@@ -3,7 +3,6 @@ module Main where
 import System.Console.GetOpt
 import System.Environment ( getArgs )
 
-import Control.Applicative
 import Control.Monad ( when )
 import Data.List ( foldl', isSuffixOf )
 
