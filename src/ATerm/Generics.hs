@@ -49,7 +49,6 @@ class ToATerm a where
   toATerm x = gToATerm (from x)
 
   toATermList :: [a] -> ATerm
-  default toATermList :: Generic a => [a] -> ATerm
   toATermList = listToATerm
 
 -- Automatically derived instances
@@ -62,13 +61,9 @@ instance (ToATerm a, ToATerm b) => ToATerm (a,b)   where toATerm     = tupleToAT
 instance                           ToATerm Char    where toATerm     = showToATerm
                                                          toATermList = stringToATerm
 instance                           ToATerm Int     where toATerm     = integralToATerm
-                                                         toATermList = listToATerm
 instance                           ToATerm Integer where toATerm     = integralToATerm
-                                                         toATermList = listToATerm
 instance                           ToATerm Float   where toATerm     = showToATerm
-                                                         toATermList = listToATerm
 instance                           ToATerm Double  where toATerm     = showToATerm
-                                                         toATermList = listToATerm
 instance ToATerm a              => ToATerm [a]     where toATerm     = toATermList
 
 instance (ToATerm a, ToATerm b, ToATerm c) => ToATerm (a,b,c)   where toATerm     = tripleToATerm
